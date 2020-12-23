@@ -32,7 +32,7 @@ const modules = [
 ];
 
 function parseModel(model, properties) {
-  return `type ${parseModelTitle(model)} = {
+  return `interface ${parseModelTitle(model)} {
     ${parseProperties(properties)}
 }\n\n`;
 }
