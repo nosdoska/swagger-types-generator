@@ -6,18 +6,19 @@
   "scripts": {
     "start": "./index.js"
   },
+  "bin": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nosdoska/swagger-types-generator.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Javier Díaz",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/nosdoska/swagger-types-generator/issues"
   },
   "homepage": "https://github.com/nosdoska/swagger-types-generator#readme",
   "dependencies": {
-    "minimist": "^1.2.5"
+    "meow": "^8.0.0"
   }
 }

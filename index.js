@@ -1,6 +1,30 @@
 #!/usr/bin/env node
 const swagger = require("./swagger.json");
 const fs = require("fs");
+const meow = require("meow");
+
+const cli = meow(
+  `
+    Usage
+      $ swagger-types-generator <swagger_file_path>
+ 
+    Options
+      --path, -p    path to save the generated types.
+      --name, -n    name of the container file that'll be saved.
+`,
+  {
+    flags: {
+      path: {
+        type: "string",
+        alias: "p",
+      },
+      name: {
+        type: "string",
+        alias: "n",
+      },
+    },
+  }
+);
 
 const modules = [
   { module: "Decimal", source: "decimal.js" },
@@ -71,10 +95,11 @@ function parseEnum(options) {
 }
 
 function parseModelTitle(title) {
-  return title
-    .split(" ")
-    .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
-    .join("");
+  return title.split(" ").map(capitalize).join("");
+}
+
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function addImports(definitions) {
@@ -95,7 +120,10 @@ function importModuleFrom(what, source) {
 
 async function saveFile(file) {
   try {
-    await fs.writeFileSync("types.ts", file);
+    await fs.writeFileSync(
+      `${cli.flags.path || ""}/${cli.flags.name || "types"}.ts`,
+      file
+    );
 
     console.log("File saved successfully.");
   } catch (error) {
@@ -108,14 +136,35 @@ function createFile(definitions, imports) {
 ${definitions.join("")}`;
 }
 
-async function main() {
-  const definitions = Object.keys(swagger.definitions).map((definition) =>
-    parseModel(definition, swagger.definitions[definition])
+async function generateFile(swaggerFile) {
+  if (!swaggerFile.definitions) {
+    throw new Error("No `definitions` key is in the JSON.");
+  }
+
+  const models = Object.keys(swaggerFile.definitions).map((modelName) =>
+    parseModel(modelName, swaggerFile.definitions[modelName])
   );
-  const imports = addImports(definitions);
-  const file = createFile(definitions, imports);
+  const imports = addImports(models);
+  const file = createFile(models, imports);
 
   await saveFile(file);
+}
+
+async function main() {
+  if (cli.input.length === 0 || !cli.input[0]) {
+    throw new Error("Swagger file hasn't been specified.");
+  }
+
+  try {
+    const swaggerFile = fs.readFileSync(cli.input[0]);
+    const swaggerFileAsJson = JSON.parse(swaggerFile);
+
+    await generateFile(swaggerFileAsJson);
+  } catch (error) {
+    console.error(
+      "Error trying to parse the specified file. Try to give a correct JSON file."
+    );
+  }
 }
 
 main();
