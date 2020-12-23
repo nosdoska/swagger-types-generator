@@ -7,12 +7,28 @@ function parseModel(model, properties) {
 }\n\n`;
 }
 
-function parseProperties({ properties }) {
+function parseProperties({ required, properties }) {
   return Object.keys(properties)
     .map((property) => {
-      return `${property}: ${parseType(properties[property])};\n`;
+      const value = properties[property];
+
+      return `${property}${isRequired(property, required)}: ${parseType(
+        value
+      )}${isNullable(value)};\n`;
     })
     .join("    ");
+}
+
+function isRequired(property, required) {
+  return required && required.includes(property) ? "" : "?";
+}
+
+function isNullable(property) {
+  if (!property["x-nullable"]) {
+    return "";
+  }
+
+  return " | null";
 }
 
 function parseType(property) {
@@ -84,7 +100,7 @@ async function main() {
   let definitions = Object.keys(swagger.definitions).map((definition) =>
     parseModel(definition, swagger.definitions[definition])
   );
-  let imports = addImports(definitions);
+  const imports = addImports(definitions);
 
   definitions = `${imports}
 ${definitions.join("")}`;
