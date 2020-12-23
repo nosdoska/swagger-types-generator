@@ -79,12 +79,22 @@ function parseType(property) {
     return "LocalDate";
   }
 
+  if (property.$ref) {
+    return parseRef(property.$ref);
+  }
+
   switch (type) {
     case "integer":
       return "number";
     default:
       return "string";
   }
+}
+
+function parseRef(ref) {
+  const splitted = ref.split("/");
+
+  return parseModelTitle(splitted[splitted.length - 1]);
 }
 
 function parseEnum(options) {
@@ -121,7 +131,7 @@ function importModuleFrom(what, source) {
 async function saveFile(file) {
   try {
     await fs.writeFileSync(
-      `${cli.flags.path || ""}/${cli.flags.name || "types"}.ts`,
+      `${cli.flags.path || "."}/${cli.flags.name || "types"}.ts`,
       file
     );
 
