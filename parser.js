@@ -8,15 +8,18 @@ function parseModel(model, properties) {
 }
 
 function parseProperties({ required, properties }) {
-  return Object.keys(properties)
-    .map((property) => {
-      const value = properties[property];
+  const propertiesKeys = Object.keys(properties);
+  const attributes = propertiesKeys.map((property) => {
+    const value = properties[property];
 
-      return `${property}${isRequired(property, required)}: ${parseType(
-        value
-      )}${isNullable(value)};\n`;
-    })
-    .join("    ");
+    return `${property}${isRequired(property, required)}: ${parseType(
+      value
+    )}${isNullable(value)};${
+      propertiesKeys[propertiesKeys.length - 1] === property ? "" : "\n"
+    }`;
+  });
+
+  return attributes.join("    ");
 }
 
 function isRequired(property, required) {
