@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/nosdoska/swagger-types-generator/issues"
   },
-  "homepage": "https://github.com/nosdoska/swagger-types-generator#readme"
+  "homepage": "https://github.com/nosdoska/swagger-types-generator#readme",
+  "dependencies": {
+    "minimist": "^1.2.5"
+  }
 }
