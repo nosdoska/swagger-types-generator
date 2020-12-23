@@ -53,6 +53,24 @@ function parseModelTitle(title) {
     .replace(/ /g, "");
 }
 
+function addImports(definitions) {
+  let imports = "";
+
+  if (definitions.some((item) => item.indexOf("Decimal") > -1)) {
+    imports += importModuleFrom("Decimal", "decimal.js");
+  }
+
+  if (definitions.some((item) => item.indexOf("LocalDate")) > -1) {
+    imports += importModuleFrom("LocalDate", "js-joda");
+  }
+
+  return imports;
+}
+
+function importModuleFrom(what, source) {
+  return `import { ${what} } from '${source}';\n`;
+}
+
 async function saveFile(file) {
   try {
     await fs.writeFileSync("types.ts", file);
@@ -64,23 +82,15 @@ async function saveFile(file) {
 }
 
 async function main() {
-  let imports = "";
-  let items = Object.keys(swagger.definitions).map((definition) =>
+  let definitions = Object.keys(swagger.definitions).map((definition) =>
     parseModel(definition, swagger.definitions[definition])
   );
+  let imports = addImports(definitions);
 
-  if (items.some((item) => item.indexOf("Decimal") > -1)) {
-    imports += `import { Decimal } from 'decimal.js';\n`;
-  }
+  definitions = `${imports}
+${definitions.join("")}`;
 
-  if (items.some((item) => item.indexOf("LocalDate")) > -1) {
-    imports += `import { LocalDate } from 'js-joda';\n`;
-  }
-
-  items = `${imports}
-${items.join("")}`;
-
-  await saveFile(items);
+  await saveFile(definitions);
 }
 
 main();
