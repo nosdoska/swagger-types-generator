@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-const swagger = require("./swagger.json");
 const fs = require("fs");
 const meow = require("meow");
+const fetch = require("node-fetch");
 
 const cli = meow(
   `
@@ -160,19 +160,26 @@ async function generateFile(swaggerFile) {
   await saveFile(file);
 }
 
+async function getFile() {
+  if (cli.input[0].indexOf("https") > -1 || cli.input[0].indexOf("http") > -1) {
+    return fetch(cli.input[0]).then((res) => res.json());
+  }
+
+  const file = fs.readFileSync(cli.input[0]);
+  return JSON.parse(file);
+}
+
 async function main() {
   if (cli.input.length === 0 || !cli.input[0]) {
     throw new Error("Swagger file hasn't been specified.");
   }
 
   try {
-    const swaggerFile = fs.readFileSync(cli.input[0]);
-    const swaggerFileAsJson = JSON.parse(swaggerFile);
-
-    await generateFile(swaggerFileAsJson);
+    await generateFile(await getFile());
   } catch (error) {
     console.error(
-      "Error trying to parse the specified file. Try to give a correct JSON file."
+      "Error trying to parse the specified file. Try to give a correct JSON file.",
+      error
     );
   }
 }

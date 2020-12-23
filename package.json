@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/nosdoska/swagger-types-generator#readme",
   "dependencies": {
-    "meow": "^8.0.0"
+    "meow": "^8.0.0",
+    "node-fetch": "^2.6.1"
   }
 }
