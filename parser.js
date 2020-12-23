@@ -49,8 +49,7 @@ function parseModelTitle(title) {
   return title
     .split(" ")
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
-    .join("")
-    .replace(/ /g, "");
+    .join("");
 }
 
 function addImports(definitions) {
