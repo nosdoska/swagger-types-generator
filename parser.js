@@ -1,6 +1,11 @@
 const swagger = require("./swagger.json");
 const fs = require("fs");
 
+const modules = [
+  { module: "Decimal", source: "decimal.js" },
+  { module: "LocalDate", source: "js-joda" },
+];
+
 function parseModel(model, properties) {
   return `type ${parseModelTitle(model)} = {
     ${parseProperties(properties)}
@@ -74,13 +79,11 @@ function parseModelTitle(title) {
 function addImports(definitions) {
   let imports = "";
 
-  if (definitions.some((item) => item.indexOf("Decimal") > -1)) {
-    imports += importModuleFrom("Decimal", "decimal.js");
-  }
-
-  if (definitions.some((item) => item.indexOf("LocalDate")) > -1) {
-    imports += importModuleFrom("LocalDate", "js-joda");
-  }
+  modules.forEach(({ module, source }) => {
+    if (definitions.some((definition) => definition.indexOf(module)) > -1) {
+      imports += importModuleFrom(module, source);
+    }
+  });
 
   return imports;
 }
