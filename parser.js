@@ -90,22 +90,25 @@ async function saveFile(file) {
   try {
     await fs.writeFileSync("types.ts", file);
 
-    console.log("File saved.");
+    console.log("File saved successfully.");
   } catch (error) {
     console.error("Error trying to save the file.");
   }
 }
 
+function createFile(definitions, imports) {
+  return `${imports}
+${definitions.join("")}`;
+}
+
 async function main() {
-  let definitions = Object.keys(swagger.definitions).map((definition) =>
+  const definitions = Object.keys(swagger.definitions).map((definition) =>
     parseModel(definition, swagger.definitions[definition])
   );
   const imports = addImports(definitions);
+  const file = createFile(definitions, imports);
 
-  definitions = `${imports}
-${definitions.join("")}`;
-
-  await saveFile(definitions);
+  await saveFile(file);
 }
 
 main();
