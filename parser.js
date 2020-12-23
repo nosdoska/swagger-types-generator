@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const swagger = require("./swagger.json");
 const fs = require("fs");
 
