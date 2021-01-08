@@ -147,12 +147,12 @@ ${definitions.join("")}`;
 }
 
 async function generateFile(swaggerFile) {
-  if (!swaggerFile.definitions) {
-    throw new Error("No `definitions` key is in the JSON.");
+  if (!swaggerFile.components) {
+    throw new Error("No `components` key is in the JSON.");
   }
 
-  const models = Object.keys(swaggerFile.definitions).map((modelName) =>
-    parseModel(modelName, swaggerFile.definitions[modelName])
+  const models = Object.keys(swaggerFile.components.schemas).map((modelName) =>
+    parseModel(modelName, swaggerFile.components.schemas[modelName])
   );
   const imports = addImports(models);
   const file = createFile(models, imports);
