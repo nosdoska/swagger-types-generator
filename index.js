@@ -2,6 +2,7 @@
 const fs = require("fs");
 const meow = require("meow");
 const fetch = require("node-fetch");
+const _ = require("lodash");
 
 const cli = meow(
   `
@@ -147,12 +148,15 @@ ${definitions.join("")}`;
 }
 
 async function generateFile(swaggerFile) {
-  if (!swaggerFile.components) {
-    throw new Error("No `components` key is in the JSON.");
+  const key = swaggerFile.components ? "components.schemas" : "definitions";
+  const schemas = _.get(swaggerFile, key);
+
+  if (!schemas) {
+    throw new Error(`No '${key}' key is in the JSON.`);
   }
 
-  const models = Object.keys(swaggerFile.components.schemas).map((modelName) =>
-    parseModel(modelName, swaggerFile.components.schemas[modelName])
+  const models = Object.keys(schemas).map((modelName) =>
+    parseModel(modelName, schemas[modelName])
   );
   const imports = addImports(models);
   const file = createFile(models, imports);

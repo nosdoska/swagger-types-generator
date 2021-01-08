@@ -1,6 +1,6 @@
 {
   "name": "swagger-types-generator",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Generate TypeScript types from Swagger",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/nosdoska/swagger-types-generator#readme",
   "dependencies": {
+    "lodash": "^4.17.20",
     "meow": "^8.0.0",
     "node-fetch": "^2.6.1"
   }
