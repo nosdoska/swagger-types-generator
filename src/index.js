@@ -127,7 +127,7 @@ async function saveFile(file) {
     const path = `${cli.flags.path || "."}/${cli.flags.name || "types"}.ts`;
     File.save(path, file);
 
-    await execSync(`prettier -w ${path}`);
+    await execSync(`./node_modules/.bin/prettier -w ${path}`);
 
     console.log("File saved successfully.");
   } catch (error) {
