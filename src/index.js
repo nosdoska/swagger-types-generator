@@ -5,6 +5,7 @@ const _ = require("lodash");
 const { cli } = require("./cli");
 const { File } = require("./file");
 const { capitalize } = require("./utils");
+const { execSync } = require("child_process");
 
 const modules = [
   { module: "Decimal", source: "decimal.js" },
@@ -12,9 +13,9 @@ const modules = [
 ];
 
 function parseModel(model, properties) {
-  return `interface ${parseModelTitle(model)} {
-    ${parseProperties(properties)}
-}\n\n`;
+  return `interface ${parseModelTitle(model)} {${parseProperties(
+    properties
+  )}}\n\n`;
 }
 
 function parseProperties({ required, properties }) {
@@ -29,7 +30,7 @@ function parseProperties({ required, properties }) {
     }`;
   });
 
-  return attributes.join("    ");
+  return attributes.join("");
 }
 
 function isRequired(property, required) {
@@ -67,7 +68,25 @@ function parseType(property) {
     return "number";
   }
 
+  if (type === "array") {
+    if (property.items.$ref) {
+      return `${parseRef(property.items.$ref)}[]`;
+    }
+
+    if (property.items.type === "integer") {
+      return "number[]";
+    }
+
+    return parseObjectArray(property);
+  }
+
   return "string";
+}
+
+function parseObjectArray(property) {
+  return `{
+    ${parseProperties(property.items)}
+}[]`;
 }
 
 function parseRef(ref) {
@@ -105,7 +124,10 @@ function importModuleFrom(what, source) {
 
 async function saveFile(file) {
   try {
-    File.save(`${cli.flags.path || "."}/${cli.flags.name || "types"}.ts`, file);
+    const path = `${cli.flags.path || "."}/${cli.flags.name || "types"}.ts`;
+    File.save(path, file);
+
+    await execSync(`prettier -w ${path}`);
 
     console.log("File saved successfully.");
   } catch (error) {
