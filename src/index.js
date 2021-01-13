@@ -1,31 +1,10 @@
 #!/usr/bin/env node
 const fs = require("fs");
-const meow = require("meow");
 const fetch = require("node-fetch");
 const _ = require("lodash");
-
-const cli = meow(
-  `
-    Usage
-      $ swagger-types-generator <swagger_file_path>
- 
-    Options
-      --path, -p    path to save the generated types.
-      --name, -n    name of the container file that'll be saved.
-`,
-  {
-    flags: {
-      path: {
-        type: "string",
-        alias: "p",
-      },
-      name: {
-        type: "string",
-        alias: "n",
-      },
-    },
-  }
-);
+const { cli } = require("./cli");
+const { File } = require("./file");
+const { capitalize } = require("./utils");
 
 const modules = [
   { module: "Decimal", source: "decimal.js" },
@@ -84,12 +63,11 @@ function parseType(property) {
     return parseRef(property.$ref);
   }
 
-  switch (type) {
-    case "integer":
-      return "number";
-    default:
-      return "string";
+  if (type === "integer") {
+    return "number";
   }
+
+  return "string";
 }
 
 function parseRef(ref) {
@@ -107,10 +85,6 @@ function parseEnum(options) {
 
 function parseModelTitle(title) {
   return title.split(" ").map(capitalize).join("");
-}
-
-function capitalize(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function addImports(definitions) {
@@ -131,10 +105,7 @@ function importModuleFrom(what, source) {
 
 async function saveFile(file) {
   try {
-    await fs.writeFileSync(
-      `${cli.flags.path || "."}/${cli.flags.name || "types"}.ts`,
-      file
-    );
+    File.save(`${cli.flags.path || "."}/${cli.flags.name || "types"}.ts`, file);
 
     console.log("File saved successfully.");
   } catch (error) {
@@ -165,12 +136,13 @@ async function generateFile(swaggerFile) {
 }
 
 async function getFile() {
-  if (cli.input[0].indexOf("https") > -1 || cli.input[0].indexOf("http") > -1) {
-    return fetch(cli.input[0]).then((res) => res.json());
+  const source = cli.input[0];
+
+  if (source.indexOf("https") > -1 || source.indexOf("http") > -1) {
+    return fetch(source).then((res) => res.json());
   }
 
-  const file = fs.readFileSync(cli.input[0]);
-  return JSON.parse(file);
+  return File.getAsJSON(source);
 }
 
 async function main() {
@@ -182,7 +154,7 @@ async function main() {
     await generateFile(await getFile());
   } catch (error) {
     console.error(
-      "Error trying to parse the specified file. Try to give a correct JSON file.",
+      "Error trying to parse the specified file. Try to give a correct JSON file.\n",
       error
     );
   }
