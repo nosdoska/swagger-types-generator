@@ -13,7 +13,7 @@ const modules = [
 ];
 
 function parseModel(model, properties) {
-  return `interface ${parseModelTitle(model)} {${parseProperties(
+  return `export interface ${parseModelTitle(model)} {${parseProperties(
     properties
   )}}\n\n`;
 }
